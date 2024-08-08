@@ -9,7 +9,7 @@ def generate_token():
     if not email:
         print("Failed to generate a temporary email.")
         return
-    
+
     password = ''.join(random.choice(string.digits) for _ in range(10))
     username = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(12))
 
@@ -63,8 +63,13 @@ def join_server(token):
 def get_temp_email():
     try:
         response = requests.get("https://www.1secmail.com/api/v1/?action=genRandomMailbox&count=1")
-        response.raise_for_status()
-        if response.headers['Content-Type'] == 'application/json; charset=utf-8':
+        response.raise_for_status()  # Check for HTTP errors
+
+        # Debug output to understand the response
+        print(f"Response content type: {response.headers.get('Content-Type')}")
+        print(f"Response text: {response.text}")
+
+        if 'application/json' in response.headers.get('Content-Type', ''):
             email_list = response.json()
             if email_list:
                 return email_list[0]
@@ -96,7 +101,7 @@ def main():
     for _ in range(num_joins):
         thread = threading.Thread(target=generate_token)
         thread.start()
-        time.sleep(join_delay)
+        time.sleep(join_delay)  # Set delay between account generations
 
 if __name__ == "__main__":
     main()
