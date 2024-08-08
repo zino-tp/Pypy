@@ -30,20 +30,32 @@ def generate_token():
         "Content-Type": "application/json"
     }
 
-    try:
-        response = requests.post("https://discord.com/api/v9/auth/register", json=payload, headers=headers)
-        response.raise_for_status()
-        if response.status_code == 201:
-            token = response.json().get("token")
-            if token:
-                print(f"Generated Token: {token}")
-                join_server(token)
+    attempt = 0
+    while attempt < 5:  # Maximal 5 Versuche
+        try:
+            response = requests.post("https://discord.com/api/v9/auth/register", json=payload, headers=headers)
+            response.raise_for_status()
+            if response.status_code == 201:
+                token = response.json().get("token")
+                if token:
+                    print(f"Generated Token: {token}")
+                    join_server(token)
+                else:
+                    print("Token not found in the response.")
+                return
             else:
-                print("Token not found in the response.")
-        else:
-            print(f"Error generating token: {response.text}")
-    except requests.exceptions.RequestException as e:
-        print(f"An error occurred while generating the token: {e}")
+                print(f"Error generating token: {response.text}")
+        except requests.exceptions.HTTPError as e:
+            if response.status_code == 429:
+                print(f"Rate limit exceeded. Waiting before retrying... (Attempt {attempt + 1})")
+                time.sleep(60)  # Warte 60 Sekunden bevor du es erneut versuchst
+            else:
+                print(f"An HTTP error occurred: {e}")
+        except requests.exceptions.RequestException as e:
+            print(f"An error occurred while generating the token: {e}")
+        attempt += 1
+
+    print("Failed to generate a token after multiple attempts.")
 
 def join_server(token):
     headers = {
@@ -65,7 +77,6 @@ def get_temp_email():
         response = requests.get("https://www.1secmail.com/api/v1/?action=genRandomMailbox&count=1")
         response.raise_for_status()  # Check for HTTP errors
 
-        # Debug output to understand the response
         print(f"Response content type: {response.headers.get('Content-Type')}")
         print(f"Response text: {response.text}")
 
